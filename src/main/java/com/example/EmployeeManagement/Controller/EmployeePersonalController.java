@@ -27,6 +27,7 @@ public class EmployeePersonalController {
         return ResponseEntity.ok(empDto);
     }
 
+
 //get each personal details by personal details id
     @GetMapping("/personal-details/{id}")
     public ResponseEntity<EmployeePersonalDTO> getEmployeesPersonalById(@PathVariable("id") Long id){
