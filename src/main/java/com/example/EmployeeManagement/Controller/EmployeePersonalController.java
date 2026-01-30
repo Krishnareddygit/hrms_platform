@@ -18,29 +18,39 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/hrms/employees")
 @AllArgsConstructor
 public class EmployeePersonalController {
-    private EmployeeService employeeService;
+    private EmployeePersonalService employeePersonalService;
 
-    @GetMapping("/employees")
-    public ResponseEntity<List<EmployeeDTO>> getAllEmployees(){
-        List<EmployeeDTO> employees = employeeService.getAllEmployee();
-        return ResponseEntity.ok(employees);
+//    get all personal details of employees
+    @GetMapping("/personal-details")
+    public ResponseEntity<List<EmployeePersonalDTO>> getAllEmployeePersonal(){
+        List<EmployeePersonalDTO> empDto = employeePersonalService.getAllEmployeesPersonal();
+        return ResponseEntity.ok(empDto);
     }
 
-    @GetMapping("/employees/{id}/profile")
-    public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable("id") Long id){
-        EmployeeDTO employee = employeeService.getEmployeeById(id);
-        return ResponseEntity.ok(employee);
+//get each personal details by personal details id
+    @GetMapping("/personal-details/{id}")
+    public ResponseEntity<EmployeePersonalDTO> getEmployeesPersonalById(@PathVariable("id") Long id){
+        EmployeePersonalDTO empDto = employeePersonalService.getEmployeePersonalById(id);
+        return ResponseEntity.ok(empDto);
     }
 
-    @PostMapping("/employees")
-    public ResponseEntity<EmployeeDTO> saveEmployee(@RequestBody Employee employee){
-        EmployeeDTO savedEmployee = employeeService.addEmployee(employee);
-        return ResponseEntity.ok(savedEmployee);
+// get employee personal details by employee id
+    @GetMapping("/{id}/personal")
+    public ResponseEntity<EmployeePersonalDTO> getEmployeesPersonalByEmployeeId(@PathVariable("id") Long id){
+        EmployeePersonalDTO empDto = employeePersonalService.getEmployeePersonalByEmployeeId(id);
+        return ResponseEntity.ok(empDto);
     }
 
-    @DeleteMapping("/employees/{id}")
-    public ResponseEntity<String> deleteEmployeeById(@PathVariable("id") Long id){
-        employeeService.deleteEmployeeById(id);
+//    add employee personal details using employee
+    @PostMapping("/{employeeId}/add-personal")
+    public ResponseEntity<EmployeePersonalDTO> addEmployeePersonalDetails(@PathVariable("employeeId") Long employeeId , @RequestBody EmployeePersonal employeePersonal){
+        EmployeePersonalDTO empDto = employeePersonalService.addEmployeePersonalDetails(employeeId,employeePersonal);
+        return ResponseEntity.ok(empDto);
+    }
+
+    @DeleteMapping("/personal-details/{id}")
+    public ResponseEntity<String> deleteEmployeePersonalById(@PathVariable("id") Long id){
+        employeePersonalService.deleteEmployeePersonalById(id);
         return ResponseEntity.ok("Employee deleted successfully");
     }
 }

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "employeeSkillId")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "employeeSkillId")
 
 public class EmployeeSkill {
 
@@ -38,8 +38,8 @@ public class EmployeeSkill {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-//    @JsonIgnore
-    @JsonBackReference
+    @JsonIgnore
+//    @JsonBackReference
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "employee_id")
     private Employee employee;

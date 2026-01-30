@@ -20,7 +20,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "employee")
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "employeeId")
+//@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "employeeId")
 public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,72 +44,82 @@ public class Employee {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToOne(mappedBy = "employee" ,
               cascade = CascadeType.ALL)
     private EmployeePersonal employeePersonal;
 
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToOne(mappedBy = "employee" ,
               cascade = CascadeType.ALL)
     private Account account;
 
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToOne(mappedBy = "employee" ,
               cascade = CascadeType.ALL)
     private JobDetails jobDetails;
 
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToMany(mappedBy = "employee" ,
                cascade = CascadeType.ALL ,
                orphanRemoval = true,
                fetch = FetchType.LAZY)
     private Set<EmployeeAddress> employeeAddress;
 
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToMany(mappedBy = "employee" ,
                cascade = CascadeType.ALL ,
                orphanRemoval = true,
                fetch = FetchType.LAZY)
     private Set<EmployeeEducation> employeeEducations;
 
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToMany(mappedBy = "employee" ,
                cascade = CascadeType.ALL ,
                orphanRemoval = true,
                fetch = FetchType.LAZY)
     private Set<EmployeeSkill> employeeSkills;
 
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToMany(mappedBy = "employee" ,
                cascade = CascadeType.ALL ,
                orphanRemoval = true,
                fetch = FetchType.LAZY)
     private Set<EmployeeBand> employeeBands;
 
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToMany(mappedBy = "employee" ,
               cascade = CascadeType.ALL ,
               orphanRemoval = true,
               fetch = FetchType.LAZY)
     private Set<EmployeeManagerHistory> employeeManagerHistories;
 
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToMany(mappedBy = "employee" ,
             cascade = CascadeType.ALL ,
             orphanRemoval = true,
             fetch = FetchType.LAZY)
     private Set<EmploymentContract> employmentContracts;
 
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToMany(mappedBy = "employee" ,
             cascade = CascadeType.ALL ,
             orphanRemoval = true,
             fetch = FetchType.LAZY)
     private Set<EmployeeEmergency> employeeEmergencies;
 
-    @JsonManagedReference
+    @JsonIgnore
+//    @JsonManagedReference
     @OneToMany(mappedBy = "employee" ,
             cascade = CascadeType.ALL ,
             orphanRemoval = true,
