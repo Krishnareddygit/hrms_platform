@@ -5,6 +5,7 @@ import com.example.EmployeeManagement.Model.EmployeeManagerHistory;
 import com.example.EmployeeManagement.Service.EmployeeManagerHistoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,30 +18,41 @@ public class EmployeeManagerHistoryController {
     private final EmployeeManagerHistoryService historyService;
 
     // Get all manager history
+    @PreAuthorize("hasAnyRole('HR_OPERATIONS','ADMIN')")
     @GetMapping("/manager-history")
     public ResponseEntity<List<EmployeeManagerHistoryDTO>> getAll() {
         return ResponseEntity.ok(historyService.getAll());
     }
 
     // Get history by ID
+    @PreAuthorize("hasAnyRole('HR_OPERATIONS','ADMIN')")
     @GetMapping("/manager-history/{historyId}")
     public ResponseEntity<EmployeeManagerHistoryDTO> getById(@PathVariable Long historyId) {
         return ResponseEntity.ok(historyService.getById(historyId));
     }
 
     // Get manager history of employee
+    @PreAuthorize("""
+        hasAnyRole('HR_OPERATIONS','HR_BP','ADMIN')
+        or (hasRole('EMPLOYEE') and @securityUtil.isSelf(#employeeId))
+    """)
     @GetMapping("/{employeeId}/manager-history")
     public ResponseEntity<List<EmployeeManagerHistoryDTO>> getByEmployee(@PathVariable Long employeeId) {
         return ResponseEntity.ok(historyService.getByEmployeeId(employeeId));
     }
 
     // Get employees under a manager
+    @PreAuthorize("""
+        hasAnyRole('HR_OPERATIONS','HR_BP','ADMIN')
+        or (hasRole('EMPLOYEE') and @securityUtil.isSelf(#managerId))
+    """)
     @GetMapping("/manager/{managerId}/employees")
     public ResponseEntity<List<EmployeeManagerHistoryDTO>> getByManager(@PathVariable Long managerId) {
         return ResponseEntity.ok(historyService.getByManagerId(managerId));
     }
 
     // Add manager history
+    @PreAuthorize("hasAnyRole('HR_OPERATIONS','ADMIN')")
     @PostMapping("/{employeeId}/manager-history")
     public ResponseEntity<EmployeeManagerHistoryDTO> addHistory(
             @PathVariable Long employeeId,
@@ -50,6 +62,7 @@ public class EmployeeManagerHistoryController {
     }
 
     // Update manager history
+    @PreAuthorize("hasAnyRole('HR_OPERATIONS','ADMIN')")
     @PutMapping("/{employeeId}/manager-history/{historyId}")
     public ResponseEntity<EmployeeManagerHistoryDTO> updateHistory(
             @PathVariable Long employeeId,
@@ -62,6 +75,7 @@ public class EmployeeManagerHistoryController {
     }
 
     // Delete one history
+    @PreAuthorize("hasAnyRole('HR_OPERATIONS','ADMIN')")
     @DeleteMapping("/manager-history/{historyId}")
     public ResponseEntity<Void> deleteById(@PathVariable Long historyId) {
         historyService.deleteById(historyId);
@@ -69,6 +83,7 @@ public class EmployeeManagerHistoryController {
     }
 
     // Delete all history of employee
+    @PreAuthorize("hasAnyRole('HR_OPERATIONS','ADMIN')")
     @DeleteMapping("/{employeeId}/manager-history")
     public ResponseEntity<Void> deleteByEmployee(@PathVariable Long employeeId) {
         historyService.deleteByEmployeeId(employeeId);

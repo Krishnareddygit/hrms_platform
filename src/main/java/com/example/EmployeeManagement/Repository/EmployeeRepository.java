@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, Long> {
@@ -26,4 +27,8 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long> {
         LOWER(CONCAT(e.firstName, ' ', e.lastName)) LIKE LOWER(CONCAT('%', :name, '%'))
     """)
     List<Employee> searchByFullName(@Param("name") String name);
+
+    Optional<Employee> findByUserId(Long userId);
+
+    List<Employee> findByManager_EmployeeId(Long managerId);
 }

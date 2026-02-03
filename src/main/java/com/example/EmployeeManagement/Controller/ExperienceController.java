@@ -5,6 +5,7 @@ import com.example.EmployeeManagement.Model.Experience;
 import com.example.EmployeeManagement.Service.ExperienceService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,23 +19,33 @@ public class ExperienceController {
 
     // Get all experience
     @GetMapping("/experience")
+    @PreAuthorize("hasAnyRole('HR_OPERATIONS','ADMIN')")
     public ResponseEntity<List<ExperienceDTO>> getAllExperience() {
         return ResponseEntity.ok(experienceService.getAllExperience());
     }
 
     // Get experience by ID
+    @PreAuthorize("hasAnyRole('HR_OPERATIONS','ADMIN')")
     @GetMapping("/experience/{experienceId}")
     public ResponseEntity<ExperienceDTO> getById(@PathVariable Long experienceId) {
         return ResponseEntity.ok(experienceService.getExperienceById(experienceId));
     }
 
     // Get all experience of employee
+    @PreAuthorize("""
+        hasAnyRole('HR_OPERATIONS','TALENT_ACQUISITION','ADMIN')
+        or (hasRole('EMPLOYEE') and @securityUtil.isSelf(#employeeId))
+    """)
     @GetMapping("/{employeeId}/experience")
     public ResponseEntity<List<ExperienceDTO>> getByEmployee(@PathVariable Long employeeId) {
         return ResponseEntity.ok(experienceService.getExperienceByEmployeeId(employeeId));
     }
 
     // Add experience
+    @PreAuthorize("""
+        hasAnyRole('HR_OPERATIONS','TALENT_ACQUISITION','ADMIN')
+        or (hasRole('EMPLOYEE') and @securityUtil.isSelf(#employeeId))
+    """)
     @PostMapping("/{employeeId}/experience")
     public ResponseEntity<ExperienceDTO> addExperience(
             @PathVariable Long employeeId,
@@ -44,6 +55,10 @@ public class ExperienceController {
     }
 
     // Update experience
+    @PreAuthorize("""
+        hasAnyRole('HR_OPERATIONS','TALENT_ACQUISITION','ADMIN')
+        or (hasRole('EMPLOYEE') and @securityUtil.isSelf(#employeeId))
+    """)
     @PutMapping("/{employeeId}/experience/{experienceId}")
     public ResponseEntity<ExperienceDTO> updateExperience(
             @PathVariable Long employeeId,
@@ -56,6 +71,7 @@ public class ExperienceController {
     }
 
     // Delete one experience
+    @PreAuthorize("hasAnyRole('HR_OPERATIONS','ADMIN')")
     @DeleteMapping("/experience/{experienceId}")
     public ResponseEntity<Void> deleteById(@PathVariable Long experienceId) {
         experienceService.deleteByExperienceId(experienceId);
@@ -63,6 +79,7 @@ public class ExperienceController {
     }
 
     // Delete all experience of employee
+    @PreAuthorize("hasAnyRole('HR_OPERATIONS','ADMIN')")
     @DeleteMapping("/{employeeId}/experience")
     public ResponseEntity<Void> deleteByEmployee(@PathVariable Long employeeId) {
         experienceService.deleteByEmployeeId(employeeId);
