@@ -23,6 +23,15 @@
 
     <dependencies>
 
+        <!--aws-->
+
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>2.25.47</version>
+        </dependency>
+
+
         <!-- Web -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

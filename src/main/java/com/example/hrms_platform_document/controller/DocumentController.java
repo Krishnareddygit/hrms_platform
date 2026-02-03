@@ -1,27 +1,40 @@
 package com.example.hrms_platform_document.controller;
-import com.example.hrms_platform_document.service.DocumentService;
+
 import com.example.hrms_platform_document.entity.Document;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
+import com.example.hrms_platform_document.service.DocumentService;
+import com.example.hrms_platform_document.service.S3StorageService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 @RestController
 @RequestMapping("/api/v1/hrms/documents")
 public class DocumentController {
 
-    @Autowired
-    private DocumentService documentService;
+    private final DocumentService documentService;
+    private final S3StorageService storageService;
 
+    public DocumentController(
+            DocumentService documentService,
+            S3StorageService storageService
+    ) {
+        this.documentService = documentService;
+        this.storageService = storageService;
+    }
+
+    // =========================
+    // UPLOAD DOCUMENT
+    // =========================
+    @PostMapping(
+            value = "/upload",
+            consumes = "multipart/form-data"
+    )
     public ResponseEntity<String> upload(
-            @RequestPart("file") MultipartFile file,
-            @RequestPart("documentName") String documentName,
-            @RequestPart("documentType") String documentType,
-            @RequestPart("employeeId") Long employeeId
-    ) throws IOException {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("documentName") String documentName,
+            @RequestParam("documentType") String documentType,
+            @RequestParam("employeeId") Long employeeId
+    ) throws Exception {
 
         documentService.uploadDocument(
                 file,
@@ -33,19 +46,27 @@ public class DocumentController {
         return ResponseEntity.ok("Document uploaded successfully");
     }
 
+    // =========================
+    // DOWNLOAD DOCUMENT
+    // =========================
     @GetMapping("/{documentId}/download")
-    public ResponseEntity<byte[]> download(@PathVariable Long documentId) {
+    public ResponseEntity<String> download(@PathVariable Long documentId) {
 
-        Document doc = documentService.getDocument(documentId);
-        byte[] fileData = documentService.downloadDocument(documentId);
+        //  Get S3 file path from DB
+        String filePath = documentService.getFilePath(documentId);
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
-                .header(
-                        HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"" + doc.getDocumentName() + "\""
-                )
-                .contentLength(fileData.length)
-                .body(fileData);
+        // Generate presigned URL
+        String downloadUrl = storageService.generatePresignedUrl(filePath);
+
+        // Return URL
+        return ResponseEntity.ok(downloadUrl);
+    }
+
+
+    @GetMapping("/{documentId}")
+    public ResponseEntity<Document> getDocument(@PathVariable Long documentId) {
+
+        Document document = documentService.getDocument(documentId);
+        return ResponseEntity.ok(document);
     }
 }

@@ -23,9 +23,15 @@ public class DocumentVersion {
     @JoinColumn(name = "document_id")
     private Document document;
 
-    @Lob
-    @Column(name = "file_data")
-    private byte[] fileData;
+    @Column(name = "file_path")
+    private String filePath;
+
+    @Column(name = "mime_type")
+    private String mimeType;
+
+    @Column(name = "file_size")
+    private Long fileSize;
+
 
     private Integer versionNumber;
     private String checksum;
