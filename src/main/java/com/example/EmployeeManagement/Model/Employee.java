@@ -1,11 +1,8 @@
 
 package com.example.EmployeeManagement.Model;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-
+import com.example.security.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,6 +34,12 @@ public class Employee {
     private double currentExperience;
     private String designation;
     private int ctc;
+    private String department;
+
+//    relation yet to establish
+    @Column(name = "created_by_hr_user_id", nullable = false)
+    private Long createdByHrUserId;
+
 
     @Column(columnDefinition = "BYTEA")
     private byte[] photo;
@@ -126,7 +129,11 @@ public class Employee {
             fetch = FetchType.LAZY)
     private Set<Experience> employeeExperiences;
 
-//    current manager of the employee
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
+    private User user;
+
+    //    current manager of the employee
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id")
     private Employee manager;

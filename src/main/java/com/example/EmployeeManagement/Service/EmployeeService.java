@@ -15,7 +15,10 @@ public class EmployeeService {
 
     private EmployeeRepository employeeRepository;
 
+    private EmployeeAccessService employeeAccessService;
+
     public List<EmployeeDTO> getAllEmployee(){
+        employeeAccessService.checkHrOrAdmin();
         return employeeRepository.findAll()
                 .stream()
                 .map(this::mapToDto)
@@ -23,6 +26,8 @@ public class EmployeeService {
     }
 
     public EmployeeDTO getEmployeeById(Long id){
+
+        employeeAccessService.checkOwnerOrHr(id);
         Employee employee = employeeRepository.findById(id)
                 .orElseThrow(() -> new EmployeeNotFoundException(id));
         return mapToDto(employee);
@@ -82,4 +87,35 @@ public class EmployeeService {
 
         return dto;
     }
+
+    public List<EmployeeDTO> getEmployeesUnderManager(Long managerId) {
+
+        // HR can view anyone, EMPLOYEE only their own subordinates
+        employeeAccessService.checkManagerAccess(managerId);
+
+        return employeeRepository.findByManager_EmployeeId(managerId)
+                .stream()
+                .map(this::mapToDto)
+                .toList();
+    }
+
+    public Employee toEntity(EmployeeDTO dto, Long hrUserId) {
+        Employee e = new Employee();
+        e.setFirstName(dto.getFirstName());
+        e.setLastName(dto.getLastName());
+        e.setCompanyEmail(dto.getCompanyEmail());
+        e.setDateOfJoining(dto.getDateOfJoining());
+        e.setStatus(dto.getStatus());
+        e.setEmployeeType(dto.getEmployeeType());
+        e.setPhoneNumber(dto.getPhoneNumber());
+        e.setCurrentBand(dto.getCurrentBand());
+        e.setCurrentExperience(dto.getCurrentExperience());
+        e.setDesignation(dto.getDesignation());
+        e.setCtc(dto.getCtc());
+        e.setCreatedByHrUserId(hrUserId);
+        return e;
+    }
+
+
+
 }

@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -68,10 +69,39 @@ public class EmployeePersonalService {
 
     }
 
+    public EmployeePersonalDTO updateEmployeePersonal(Long employeeId , EmployeePersonalDTO dto) {
+
+        // 1. Fetch existing personal record
+        EmployeePersonal personal = employeePersonalRepository
+                .getByEmployeeId(employeeId)
+                .orElseThrow(() ->
+                        new EmployeeNotFoundException(employeeId));
+
+        // 2. Update fields
+        personal.setDob(dto.getDob());
+        personal.setGender(dto.getGender());
+        personal.setBloodGroup(dto.getBloodGroup());
+        personal.setNationality(dto.getNationality());
+        personal.setMaritalStatus(dto.getMaritalStatus());
+        personal.setFatherName(dto.getFatherName());
+        personal.setSpouseName(dto.getSpouseName());
+        personal.setPersonalMail(dto.getPersonalMail());
+        personal.setAlternatePhoneNumber(dto.getAlternatePhoneNumber());
+
+        personal.setUpdatedAt(LocalDateTime.now());
+
+        // 3. Save
+        EmployeePersonal updated = employeePersonalRepository.save(personal);
+
+        // 4. Map to DTO and return
+        return mapToDto(updated);
+    }
+
     //    deletes employee personal by employee personal id
     public void deleteEmployeeByEmployeeId(Long id){
         employeePersonalRepository.deleteByEmployeeId(id);
     }
+
     public EmployeePersonalDTO mapToDto(EmployeePersonal employeePersonal){
         EmployeePersonalDTO dto = new EmployeePersonalDTO();
         dto.setPersonalId(employeePersonal.getPersonalId());
