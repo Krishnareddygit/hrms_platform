@@ -1,8 +1,6 @@
 package com.example.security.controller;
 
-import com.example.security.dto.AuthRequest;
-import com.example.security.dto.AuthResponse;
-import com.example.security.dto.ChangePasswordRequest;
+import com.example.security.dto.*;
 import com.example.security.jwt.JwtService;
 import com.example.security.model.User;
 import com.example.security.repository.UserRepository;
@@ -36,21 +34,21 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
-        // Fetch user from database by username
+
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new BadCredentialsException("Invalid username or password"));
 
-        // Check password against hashed password in DB
         if (!BCrypt.checkpw(request.getPassword(), user.getPassword())) {
             throw new BadCredentialsException("Invalid username or password");
         }
 
-        // Generate JWT token
         String jwtToken = jwtService.generateToken(user);
 
-        // Return JWT
-        return ResponseEntity.ok(new AuthResponse(jwtToken));
+        return ResponseEntity.ok(
+                new AuthResponse(jwtToken, user.isMustChangePassword())
+        );
     }
+
 
     /**
      * Change password for logged-in user
@@ -69,4 +67,26 @@ public class AuthController {
     public ResponseEntity<Void> logout() {
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(
+            @RequestBody ForgotPasswordRequest request) {
+
+        userService.generateResetToken(request.getUsername());
+
+        // Always return same response (security best practice)
+        return ResponseEntity.ok(
+                "If the account exists, a password reset email has been sent"
+        );
+    }
+
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(
+            @RequestBody ResetPasswordRequest request) {
+
+        userService.resetPassword(request);
+        return ResponseEntity.ok("Password reset successful");
+    }
+
 }

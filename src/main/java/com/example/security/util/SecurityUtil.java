@@ -1,5 +1,6 @@
 package com.example.security.util;
 
+import com.example.EmployeeManagement.Model.Employee;
 import com.example.EmployeeManagement.Repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -20,5 +21,23 @@ public class SecurityUtil {
                 .map(emp -> emp.getCompanyEmail().equals(username))
                 .orElse(false);
     }
+
+    public Employee getLoggedInEmployee() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        return employeeRepository.findByCompanyEmail(username)
+                .orElseThrow(() -> new RuntimeException("Logged-in employee not found"));
+    }
+
+    public boolean hasRole(String role) {
+        return SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getAuthorities()
+                .stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
+    }
+
+
 }
 

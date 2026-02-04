@@ -47,6 +47,15 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "must_change_password")
+    private boolean mustChangePassword = false;
+
+    @Column(name = "reset_token")
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    private LocalDateTime resetTokenExpiry;
+
     @PrePersist
     public void onCreate() {
         this.createdAt = LocalDateTime.now();

@@ -1,53 +1,69 @@
 package com.example.time.controller;
 
 import com.example.EmployeeManagement.Model.Employee;
-import com.example.EmployeeManagement.Repository.EmployeeRepository;
 import com.example.time.dto.LeaveRequestDTO;
 import com.example.time.entity.LeaveRequest;
 import com.example.time.mapper.LeaveRequestMapper;
 import com.example.time.services.LeaveService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.security.util.SecurityUtil;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/hrms/time/leaves")
+@RequiredArgsConstructor
 public class LeaveController {
 
-    @Autowired
-    private LeaveService leaveService;
-
-    @Autowired
-    private EmployeeRepository employeeRepository;
+    private final LeaveService leaveService;
+    private final SecurityUtil securityUtil;
 
     /**
-     * POST /api/v1/hrms/time/leaves/apply
+     * APPLY LEAVE
+     * Employee can apply ONLY for self
      */
+    @PreAuthorize("hasRole('EMPLOYEE')")
     @PostMapping("/apply")
     public LeaveRequestDTO applyLeave(@RequestBody LeaveRequestDTO dto) {
-        Employee employee = employeeRepository.findById(dto.getEmployeeId())
-                .orElseThrow(() -> new RuntimeException("Employee not found: " + dto.getEmployeeId()));
+
+        // Logged-in employee (SAFE)
+        Employee employee = securityUtil.getLoggedInEmployee();
+
         LeaveRequest entity = LeaveRequestMapper.toEntity(dto, employee);
         LeaveRequest saved = leaveService.applyLeave(entity);
+
         return LeaveRequestMapper.toDTO(saved);
     }
 
     /**
-     * PUT /api/v1/hrms/time/leaves/{leaveRequestId}/approve
+     * APPROVE LEAVE
+     * ONLY employee's CURRENT MANAGER can approve
      */
+    @PreAuthorize("hasRole('EMPLOYEE')")
     @PutMapping("/{leaveRequestId}/approve")
-    public LeaveRequestDTO approveLeave(@PathVariable Long leaveRequestId,
-                                        @RequestParam Long approverId) {
-        LeaveRequest approved = leaveService.approveLeave(leaveRequestId, approverId);
+    public LeaveRequestDTO approveLeave(@PathVariable Long leaveRequestId) {
+
+        Employee approver = securityUtil.getLoggedInEmployee();
+
+        LeaveRequest approved =
+                leaveService.approveLeave(leaveRequestId, approver.getEmployeeId());
+
         return LeaveRequestMapper.toDTO(approved);
     }
 
     /**
-     * PUT /api/v1/hrms/time/leaves/{leaveRequestId}/reject
+     * REJECT LEAVE
+     * ONLY employee's CURRENT MANAGER can reject
      */
+    @PreAuthorize("hasRole('EMPLOYEE')")
     @PutMapping("/{leaveRequestId}/reject")
-    public LeaveRequestDTO rejectLeave(@PathVariable Long leaveRequestId,
-                                       @RequestParam Long approverId) {
-        LeaveRequest rejected = leaveService.rejectLeave(leaveRequestId, approverId);
+    public LeaveRequestDTO rejectLeave(@PathVariable Long leaveRequestId) {
+
+        Employee approver = securityUtil.getLoggedInEmployee();
+
+        LeaveRequest rejected =
+                leaveService.rejectLeave(leaveRequestId, approver.getEmployeeId());
+
         return LeaveRequestMapper.toDTO(rejected);
     }
 }

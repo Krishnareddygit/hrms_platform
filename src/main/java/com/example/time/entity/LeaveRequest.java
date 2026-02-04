@@ -38,5 +38,7 @@ public class LeaveRequest {
 
     private Long approvedBy;
 
+    private LocalDateTime approvedOn;
+
     private LocalDateTime appliedOn;
 }

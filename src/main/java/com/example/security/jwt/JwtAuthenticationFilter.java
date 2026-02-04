@@ -33,6 +33,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+        // 🔓 SKIP JWT FILTER FOR PUBLIC AUTH ENDPOINTS
+        if (path.startsWith("/api/v1/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
         String jwt = null;
         String username = null;
@@ -48,7 +56,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails =
                     userDetailsService.loadUserByUsername(username);
 
-            // ✅ NO CASTING HERE
             if (jwtService.isTokenValid(jwt, userDetails)) {
 
                 UsernamePasswordAuthenticationToken authToken =
@@ -70,4 +77,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
+
 }

@@ -8,13 +8,18 @@ import com.example.hrms_platform_document.entity.DocumentVersion;
 import com.example.hrms_platform_document.repository.DocumentRepository;
 import com.example.hrms_platform_document.repository.DocumentVersionRepository;
 import com.example.hrms_platform_document.util.FileNameUtil;
+import com.example.security.util.SecurityUtil;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DocumentService {
 
     private final DocumentRepository documentRepo;
@@ -23,19 +28,7 @@ public class DocumentService {
     private final DocumentAuditService auditService;
     private final S3StorageService storageService;
 
-    public DocumentService(
-            DocumentRepository documentRepo,
-            DocumentVersionRepository versionRepo,
-            EmployeeRepository employeeRepo,
-            DocumentAuditService auditService,
-            S3StorageService storageService
-    ) {
-        this.documentRepo = documentRepo;
-        this.versionRepo = versionRepo;
-        this.employeeRepo = employeeRepo;
-        this.auditService = auditService;
-        this.storageService = storageService;
-    }
+    private SecurityUtil securityUtil;
 
     // =========================
     // 📤 UPLOAD DOCUMENT
@@ -115,4 +108,33 @@ public class DocumentService {
         return documentRepo.findById(documentId)
                 .orElseThrow(() -> new RuntimeException("Document not found"));
     }
+
+    public boolean isOwner(Long documentId) {
+
+
+        Employee loggedIn = securityUtil.getLoggedInEmployee();
+
+        Document document = documentRepo.findById(documentId)
+                .orElseThrow(() -> new RuntimeException("Document not found"));
+
+        return document.getEmployee().getEmployeeId().equals(loggedIn.getEmployeeId());
+    }
+
+    public Employee getEmployee(Long employeeId) {
+        return employeeRepo.findById(employeeId)
+                .orElseThrow(() ->
+                        new EmployeeNotFoundException(employeeId)
+                );
+    }
+
+    public List<Document> getDocumentsByEmployee(Long employeeId) {
+
+        Employee employee = employeeRepo.findById(employeeId)
+                .orElseThrow(() ->
+                        new EmployeeNotFoundException(employeeId)
+                );
+
+        return documentRepo.findByEmployee(employee);
+    }
+
 }
